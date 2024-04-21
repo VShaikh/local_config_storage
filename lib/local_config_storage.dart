@@ -105,7 +105,7 @@ class LocalConfigStorage {
   }
 
   void _persistDefaults() {
-    saveContent(_dataFilePath, jsonEncode(_defaultsDataMap.map((key, value) => MapEntry(key, value))));
+    saveContent(_defaultsFilePath, jsonEncode(_defaultsDataMap.map((key, value) => MapEntry(key, value))));
   }
 
   bool getBool(String key) => _get(key);
