@@ -40,7 +40,7 @@ class LocalConfigStorage {
 
   bool existsDefaultsFile() => existsFile(_defaultsFilePath);
 
-  String getDefaultsFilePath(filePath) => filePath + "./defaults";
+  String getDefaultsFilePath(filePath) => filePath + ".defaults";
 
   void resetDefaultConfig() {
     _deleteConfigFile();
