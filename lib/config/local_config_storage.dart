@@ -7,10 +7,12 @@ class LocalConfigStorage {
   static LocalConfigStorage? instance;
 
   late String _dataFilePath;
-  final Map<String, dynamic> _dataMap = {};
+
+  // final Map<String, dynamic> _dataMap = {};
 
   late String _defaultsFilePath;
-  final Map<String, dynamic> _defaultsDataMap = {};
+
+  // final Map<String, dynamic> _defaultsDataMap = {};
 
   static LocalConfigStorage getInstance() {
     instance ??= LocalConfigStorage();
@@ -21,18 +23,19 @@ class LocalConfigStorage {
     _dataFilePath = dataFile;
     _defaultsFilePath = getDefaultsFilePath(dataFile);
     if (!existsDataFile() || !existsDefaultsFile()) {
-      _defaultsDataMap.clear();
-      _defaultsDataMap.addAll(data);
-      _dataMap.clear();
-      _dataMap.addAll(data);
-      _persistData();
-      _persistDefaults();
+      // _defaultsDataMap.clear();
+      // _defaultsDataMap.addAll(data);
+      // _dataMap.clear();
+      // _dataMap.addAll(data);
+      _persistData(data);
+      _persistDefaults(data);
     } else {
-      _dataMap.clear();
-      _dataMap.addAll(_dataFromFile());
-
-      _defaultsDataMap.clear();
-      _defaultsDataMap.addAll(_defaultsFromFile());
+      throw Exception("Unable to find file $_dataFilePath or $_defaultsFilePath");
+      // _dataMap.clear();
+      // _dataMap.addAll(_dataFromFile());
+      //
+      // _defaultsDataMap.clear();
+      // _defaultsDataMap.addAll(_defaultsFromFile());
     }
   }
 
@@ -43,14 +46,13 @@ class LocalConfigStorage {
   String getDefaultsFilePath(filePath) => filePath + ".defaults";
 
   void resetDefaultConfig() {
-    _deleteConfigFile();
-    _dataMap.clear();
-    _dataMap.addAll(_defaultsDataMap);
-    _persistData();
-    _persistDefaults();
+    _deleteDataFile();
+    // _dataMap.clear();
+    // _dataMap.addAll(_defaultsDataMap);
+    _persistData(_defaultsFromFile());
   }
 
-  void _deleteConfigFile() => existsFile(_dataFilePath) ? File(_dataFilePath).deleteSync() : {};
+  void _deleteDataFile() => existsFile(_dataFilePath) ? File(_dataFilePath).deleteSync() : {};
 
   Map<String, dynamic> _dataFromFile() {
     if (existsFile(_dataFilePath) && fileContent(_dataFilePath).isNotEmpty) {
@@ -78,8 +80,9 @@ class LocalConfigStorage {
   bool _existsIn(Map<String, dynamic> data, String key) => data.entries.where((e) => e.key == key).isNotEmpty;
 
   dynamic _get(String key) {
-    if (_existsIn(_dataMap, key)) {
-      return _dataMap.entries.firstWhere((e) => e.key == key).value;
+    var dataMap = _dataFromFile();
+    if (_existsIn(dataMap, key)) {
+      return dataMap.entries.firstWhere((e) => e.key == key).value;
     } else {
       throw Exception("No value found for $key");
     }
@@ -100,12 +103,12 @@ class LocalConfigStorage {
     saveContent(_dataFilePath, jsonEncode(data));
   }
 
-  void _persistData() {
-    saveContent(_dataFilePath, jsonEncode(_dataMap.map((key, value) => MapEntry(key, value))));
+  void _persistData(Map<String, dynamic> data) {
+    saveContent(_dataFilePath, jsonEncode(data.map((key, value) => MapEntry(key, value))));
   }
 
-  void _persistDefaults() {
-    saveContent(_defaultsFilePath, jsonEncode(_defaultsDataMap.map((key, value) => MapEntry(key, value))));
+  void _persistDefaults(Map<String, dynamic> data) {
+    saveContent(_defaultsFilePath, jsonEncode(data.map((key, value) => MapEntry(key, value))));
   }
 
   bool getBool(String key) => _get(key);
